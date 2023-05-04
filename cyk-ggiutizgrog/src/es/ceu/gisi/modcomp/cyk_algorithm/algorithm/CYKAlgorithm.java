@@ -2,7 +2,8 @@ package es.ceu.gisi.modcomp.cyk_algorithm.algorithm;
 
 import es.ceu.gisi.modcomp.cyk_algorithm.algorithm.exceptions.CYKAlgorithmException;
 import es.ceu.gisi.modcomp.cyk_algorithm.algorithm.interfaces.CYKAlgorithmInterface;
-
+import java.util.HashSet;
+import java.util.Set;
 /**
  * Esta clase contiene la implementación de la interfaz CYKAlgorithmInterface
  * que establece los métodos necesarios para el correcto funcionamiento del
@@ -11,7 +12,11 @@ import es.ceu.gisi.modcomp.cyk_algorithm.algorithm.interfaces.CYKAlgorithmInterf
  * @author Sergio Saugar García <sergio.saugargarcia@ceu.es>
  */
 public class CYKAlgorithm implements CYKAlgorithmInterface {
-
+    // Aquí uso la interfaz Set y clase HashSet para inicializar un conjunto 
+    // vacío donde iremos añadiendo los símbolos no terminales.
+    private Set<Character> conjuntoNoTerminales = new HashSet<>();
+    // Ahora haré lo mismo pero para los elementos terminales
+    private Set<Character> conjuntoTerminales = new HashSet<>();
     @Override
     /**
      * Método que añade los elementos no terminales de la gramática.
@@ -19,8 +24,22 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * @param nonterminal Por ejemplo, 'S'
      * @throws CYKAlgorithmException Si el elemento no es una letra mayúscula.
      */
+    
+    // En este método tenemos que pasar como parámetro un caracter no-terminal 
+    // Que equivale a decir que el parámetro de este método solamente puede ser
+    // una letra masyúscula. Para ello voy a usar el método 
+    // Character isIpperCase().
+    
+    // Todos los elementos no terminales los almacenaré en un conjunto Set usando 
+     // un Set y HashSet.
+    
+            
     public void addNonTerminal(char nonterminal) throws CYKAlgorithmException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(Character.isUpperCase(nonterminal)){
+            conjuntoNoTerminales.add(nonterminal);
+        } else{
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     @Override
@@ -30,8 +49,15 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * @param terminal Por ejemplo, 'a'
      * @throws CYKAlgorithmException Si el elemento no es una letra minúscula.
      */
+    
+    // En este método haremos algo parecido al método de arriba, pero añadiremos
+    // los elementos terminales en su conjunto correspondiente.
     public void addTerminal(char terminal) throws CYKAlgorithmException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(Character.isLowerCase(terminal)){
+            conjuntoTerminales.add(terminal);
+        } else{
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
     @Override
@@ -135,5 +161,4 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     public String getGrammar() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
 }
