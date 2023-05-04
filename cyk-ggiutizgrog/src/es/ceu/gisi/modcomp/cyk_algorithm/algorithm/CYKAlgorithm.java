@@ -17,6 +17,9 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     private Set<Character> conjuntoNoTerminales = new HashSet<>();
     // Ahora haré lo mismo pero para los elementos terminales
     private Set<Character> conjuntoTerminales = new HashSet<>();
+    // Aquí declaro la variable para donde se guardará el elemento no terminal
+    // que se considerará como el axioma de la gramática.
+    char axioma;
     @Override
     /**
      * Método que añade los elementos no terminales de la gramática.
@@ -56,7 +59,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         if(Character.isLowerCase(terminal)){
             conjuntoTerminales.add(terminal);
         } else{
-            throw new UnsupportedOperationException("Not supported yet.");
+            throw new UnsupportedOperationException("El elemento no se agregó porque no es un elemento terminal.");
         }
     }
 
@@ -70,7 +73,12 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * conjunto de elementos no terminales.
      */
     public void setStartSymbol(char nonterminal) throws CYKAlgorithmException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(conjuntoNoTerminales.contains(nonterminal)){
+            axioma = nonterminal;
+        } else{
+           throw new UnsupportedOperationException("El elemento insterado no es parte del conjunto de no terminales."); 
+        }
+        
     }
 
     @Override
