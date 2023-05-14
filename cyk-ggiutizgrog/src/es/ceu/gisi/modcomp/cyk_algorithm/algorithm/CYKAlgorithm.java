@@ -4,6 +4,7 @@ import es.ceu.gisi.modcomp.cyk_algorithm.algorithm.exceptions.CYKAlgorithmExcept
 import es.ceu.gisi.modcomp.cyk_algorithm.algorithm.interfaces.CYKAlgorithmInterface;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.HashMap;
 /**
  * Esta clase contiene la implementación de la interfaz CYKAlgorithmInterface
  * que establece los métodos necesarios para el correcto funcionamiento del
@@ -12,11 +13,11 @@ import java.util.Set;
  * @author Sergio Saugar García <sergio.saugargarcia@ceu.es>
  */
 public class CYKAlgorithm implements CYKAlgorithmInterface {
-    // Aquí uso la interfaz Set y clase HashSet para inicializar un conjunto 
+    // Aquí uso la interfaz Set y clase HashSet para inicializar un conjunto
     // vacío donde iremos añadiendo los símbolos no terminales.
-    private Set<Character> conjuntoNoTerminales = new HashSet<>();
+    private HashSet<Character> conjuntoNoTerminales = new HashSet<>();
     // Ahora haré lo mismo pero para los elementos terminales
-    private Set<Character> conjuntoTerminales = new HashSet<>();
+    private HashSet<Character> conjuntoTerminales = new HashSet<>();
     // Aquí declaro la variable para donde se guardará el elemento no terminal
     // que se considerará como el axioma de la gramática.
     char axioma;
@@ -27,16 +28,16 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * @param nonterminal Por ejemplo, 'S'
      * @throws CYKAlgorithmException Si el elemento no es una letra mayúscula.
      */
-    
-    // En este método tenemos que pasar como parámetro un caracter no-terminal 
+
+    // En este método tenemos que pasar como parámetro un caracter no-terminal
     // Que equivale a decir que el parámetro de este método solamente puede ser
-    // una letra masyúscula. Para ello voy a usar el método 
+    // una letra masyúscula. Para ello voy a usar el método
     // Character isIpperCase().
-    
-    // Todos los elementos no terminales los almacenaré en un conjunto Set usando 
+
+    // Todos los elementos no terminales los almacenaré en un conjunto Set usando
      // un Set y HashSet.
-    
-            
+
+
     public void addNonTerminal(char nonterminal) throws CYKAlgorithmException {
         if(Character.isUpperCase(nonterminal)){
             conjuntoNoTerminales.add(nonterminal);
@@ -52,7 +53,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * @param terminal Por ejemplo, 'a'
      * @throws CYKAlgorithmException Si el elemento no es una letra minúscula.
      */
-    
+
     // En este método haremos algo parecido al método de arriba, pero añadiremos
     // los elementos terminales en su conjunto correspondiente.
     public void addTerminal(char terminal) throws CYKAlgorithmException {
@@ -76,12 +77,13 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         if(conjuntoNoTerminales.contains(nonterminal)){
             axioma = nonterminal;
         } else{
-           throw new UnsupportedOperationException("El elemento insterado no es parte del conjunto de no terminales."); 
+           throw new UnsupportedOperationException("El elemento insterado no es parte del conjunto de no terminales.");
         }
-        
+
     }
 
-    @Override
+    //@override --> Por alguna razón poniendo el override aquí me daba un error
+    // Así que lo he movido abajo
     /**
      * Método utilizado para construir la gramática. Admite producciones en FNC,
      * es decir de tipo A::=BC o A::=a
@@ -92,10 +94,48 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * compuesta por elementos (terminales o no terminales) no definidos
      * previamente.
      */
+
+    // Para este método lo que conviene usar es un HashMap, porque el HashMap
+    // es una estructura de datos que implementa el concepto de "Key-Value Pair".
+    // Por lo que, a cada símbolo no terminal, le podemos asociar un String de dos elementos no terminales
+    // o de un solo elemento terminal para respeter la forma normal de Chomsky
+    // y así definir las derivaciones de la gramática.
+    HashMap<Character, HashSet<String>> productions = new HashMap<>();
+    // También tiene sentido generar un conjunto de producciones donde se guardarán las reglas de la gramática en forma de cadenas o Strings.
+    HashSet<String> conjuntoProducciones = new HashSet<>();
+    @Override
+    // He movido el override aquí abajo
     public void addProduction(char nonterminal, String production) throws CYKAlgorithmException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    if(production.length() != 2 && production.length() != 1){
+        throw new UnsupportedOperationException("Not Supported Yet!");
     }
 
+    if(production.length() == 2){
+        char[] elementosNoTerminales = production.toCharArray();
+        for(char elementoNoTerminal: elementosNoTerminales){
+            if(!conjuntoNoTerminales.contains(elementoNoTerminal)){
+                throw new UnsupportedOperationException("Not Supported Yet!");
+            } else{
+                for(char elementoNoTerminal2: elementosNoTerminales) {
+                    String elementoNoTerminal2String = String.valueOf(elementoNoTerminal2);
+                    conjuntoProducciones.add(elementoNoTerminal2String);
+                    productions.put(nonterminal, conjuntoProducciones);
+                }
+            }
+        }
+        productions.put(nonterminal, conjuntoProducciones);
+    } else if(production.length() == 1){
+        char elementoTerminal = production.charAt(0);
+        if(!conjuntoTerminales.contains(elementoTerminal)) {
+            throw new UnsupportedOperationException("Not Supported Yet!");
+        } else{
+            String elementoTerminalString = String.valueOf(elementoTerminal);
+            conjuntoProducciones.add(elementoTerminalString);
+            productions.put(nonterminal, conjuntoProducciones);
+        }
+    }
+    
+}
     @Override
     /**
      * Método que indica si una palabra pertenece al lenguaje generado por la
@@ -109,7 +149,18 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * conjunto de terminales definido para la gramática introducida, si la
      * gramática es vacía o si el autómata carece de axioma.
      */
-    public boolean isDerived(String word) throws CYKAlgorithmException {
+    public boolean isDerived(String word) throws CYKAlgorithmException{
+        // Aquí tenemos que aplicar el algoritmo CYK. Primero creamos una matriz del tamaño de la palabra insertada como parámetro 
+        // Para poder empezar a aplicar el algoritmo dada una reglas para la gramática.
+        
+        int matrixLength = word.length();
+        String[][] matrix = new String[matrixLength][matrixLength];
+        for(int i = matrixLength; i >= 0; i--){
+            for(int j = 1; i <= matrixLength; i++){
+            matrix[i][j] = ""; // TODO
+            }
+        }
+        
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
