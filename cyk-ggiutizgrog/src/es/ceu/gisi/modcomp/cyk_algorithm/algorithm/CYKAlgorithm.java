@@ -155,14 +155,38 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         
         int matrixLength = word.length();
         String[][] matrix = new String[matrixLength][matrixLength];
-        for(int i = matrixLength; i >= 0; i--){
+        /*for(int i = matrixLength; i >= 0; i--){
             for(int j = 1; i <= matrixLength; i++){
             matrix[i][j] = ""; // TODO
             }
+        }*/
+        
+        // Primero hay que verificar si la palabra 'word' insertada como parámetro no está vacía
+        if(word.isEmpty()){
+            throw new UnsupportedOperationException("Not supported yet");
         }
         
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Luego tenemos que verificar si la gramática está vacía-
+         if(conjuntoNoTerminales.isEmpty()){
+             throw new UnsupportedOperationException("Not supported yet!");
+         }
+        // Si el propio autómata no contiene el axioma para la producción.
+        if(axioma == '\0' || Character.isWhitespace(axioma)){
+        throw new UnsupportedOperationException("Not supported yet!");
+        }
+        
+        // Hay que verificar si la palabra 'word' contiene elementos no terminales, y en caso de que las tenga, lanzar una excepción:
+        // TODO
+        
+        
+        
+        
+        
+        return true; // Este return es temporal
     }
+    
+    // Y también tenemos que ver si el autómata tiene axioma o si carece de él
+    
 
     @Override
     /**
