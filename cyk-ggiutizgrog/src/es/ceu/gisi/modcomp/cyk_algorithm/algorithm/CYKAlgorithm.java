@@ -42,7 +42,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         if(Character.isUpperCase(nonterminal)){
             conjuntoNoTerminales.add(nonterminal);
         } else{
-            throw new UnsupportedOperationException("Not supported yet.");
+            throw new CYKAlgorithmException();
         }
     }
 
@@ -57,10 +57,10 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     // En este método haremos algo parecido al método de arriba, pero añadiremos
     // los elementos terminales en su conjunto correspondiente.
     public void addTerminal(char terminal) throws CYKAlgorithmException {
-        if(Character.isLowerCase(terminal)){
+        if(Character.isLowerCase(terminal) && conjuntoTerminales.contains(terminal)){
             conjuntoTerminales.add(terminal);
         } else{
-            throw new UnsupportedOperationException("El elemento no se agregó porque no es un elemento terminal.");
+            throw new CYKAlgorithmException();
         }
     }
 
@@ -77,7 +77,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         if(conjuntoNoTerminales.contains(nonterminal)){
             axioma = nonterminal;
         } else{
-           throw new UnsupportedOperationException("El elemento insterado no es parte del conjunto de no terminales.");
+           throw new CYKAlgorithmException();
         }
 
     }
@@ -107,14 +107,14 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     // He movido el override aquí abajo
     public void addProduction(char nonterminal, String production) throws CYKAlgorithmException {
     if(production.length() != 2 && production.length() != 1){
-        throw new UnsupportedOperationException("Not Supported Yet!");
+        throw new CYKAlgorithmException();
     }
 
     if(production.length() == 2){
         char[] elementosNoTerminales = production.toCharArray();
         for(char elementoNoTerminal: elementosNoTerminales){
             if(!conjuntoNoTerminales.contains(elementoNoTerminal)){
-                throw new UnsupportedOperationException("Not Supported Yet!");
+                throw new CYKAlgorithmException();
             } else{
                 for(char elementoNoTerminal2: elementosNoTerminales) {
                     String elementoNoTerminal2String = String.valueOf(elementoNoTerminal2);
@@ -127,7 +127,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     } else if(production.length() == 1){
         char elementoTerminal = production.charAt(0);
         if(!conjuntoTerminales.contains(elementoTerminal)) {
-            throw new UnsupportedOperationException("Not Supported Yet!");
+            throw new CYKAlgorithmException();
         } else{
             String elementoTerminalString = String.valueOf(elementoTerminal);
             conjuntoProducciones.add(elementoTerminalString);
@@ -136,6 +136,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     }
     
 }
+    
     @Override
     /**
      * Método que indica si una palabra pertenece al lenguaje generado por la
@@ -149,12 +150,13 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * conjunto de terminales definido para la gramática introducida, si la
      * gramática es vacía o si el autómata carece de axioma.
      */
+    
     public boolean isDerived(String word) throws CYKAlgorithmException{
         // Aquí tenemos que aplicar el algoritmo CYK. Primero creamos una matriz del tamaño de la palabra insertada como parámetro 
         // Para poder empezar a aplicar el algoritmo dada una reglas para la gramática.
         
         int matrixLength = word.length();
-        String[][] matrix = new String[matrixLength][matrixLength];
+        boolean[][] matrix = new boolean[matrixLength][matrixLength];
         /*for(int i = matrixLength; i >= 0; i--){
             for(int j = 1; i <= matrixLength; i++){
             matrix[i][j] = ""; // TODO
@@ -163,31 +165,74 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         
         // Primero hay que verificar si la palabra 'word' insertada como parámetro no está vacía
         if(word.isEmpty()){
-            throw new UnsupportedOperationException("Not supported yet");
+            throw new CYKAlgorithmException();
         }
         
         // Luego tenemos que verificar si la gramática está vacía-
          if(conjuntoNoTerminales.isEmpty()){
-             throw new UnsupportedOperationException("Not supported yet!");
+             throw new CYKAlgorithmException();
          }
         // Si el propio autómata no contiene el axioma para la producción.
         if(axioma == '\0' || Character.isWhitespace(axioma)){
-        throw new UnsupportedOperationException("Not supported yet!");
+        throw new CYKAlgorithmException();
         }
         
         // Hay que verificar si la palabra 'word' contiene elementos no terminales, y en caso de que las tenga, lanzar una excepción:
-        // TODO
+        for(int i = 1; i <= word.length(); i++){
+            if(!conjuntoNoTerminales.contains(word.charAt(i))){
+                throw new CYKAlgorithmException();
+            }
+        }
+        /*// Luego hay que rellenar la matriz de tamaño matrixLength x matrixLength con espacion vacíos, así al aplicar el algoritmo CYK, podremos añadir cada símbolo terminal en su celda correspondiente.
+        for(int i = 1; i <= matrixLength; i++){
+            for(int j = 1; j<= matrixLength; j++){
+                matrix[i][j] = "";
+            }
+        }*/
+        // Ahora toca aplicar el algoritmo CYK:
         
-        
-        
-        
-        
-        return true; // Este return es temporal
+        // Llenar la matriz con subcadenas cogidas de 1 en 1 para toda la palabra 'word'
+        for(int i = 0; i < matrixLength; i++){
+            char simboloTerminal = word.charAt(i);
+            
+            // Ahora tenemos que comprobar si alguna de las producciones genera un elemento terminal
+            for(char noTerminal: conjuntoNoTerminales){
+                HashSet<String> productionNoTerminal = productions.get(noTerminal);
+                for(String producion: productionNoTerminal){
+                    if(producion.length() == 1 && producion.charAt(0) == simboloTerminal){
+                        matrix[i][i] = true;
+                    }
+                }
+            }
+        }
+        // Ahora tenemos que coger las subcadenas de n en m con n <= m. Es decir, calcular las subcadenas con una longitud > 1.
+        for(int longitud = 2; longitud <= matrixLength; longitud++){
+            for(int i = 0; i <= matrixLength - longitud; i++){
+                int j = i + longitud - 1;
+                // Comprobar todas las combinaciones de no terminales para ver si generar la subcadena.
+                for(int k = i; k < j; k++){
+                    for(char noTerminal: conjuntoNoTerminales){
+                        HashSet<String> production2NoTerminal = productions.get(noTerminal);
+                        // Comprobar combinación de símbolos
+                        for(String producion2: production2NoTerminal){
+                            if(producion2.length() == 2){
+                                // TODO
+                                if(matrix[i][k] && matrix[k + 1][j] && conjuntoNoTerminales.contains(producion2.charAt(0)) && conjuntoNoTerminales.contains(producion2.charAt(1))){
+                                    // TODO
+                                    matrix[i][j] = true;
+                                    break;
+                                    // El break sirve para salir del if más 'anidado'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return matrix[0][matrixLength - 1];
+        // Para retornar el axioma en caso de que se encuentre dentro de la cela inicial de la matriz
     }
     
-    // Y también tenemos que ver si el autómata tiene axioma o si carece de él
-    
-
     @Override
     /**
      * Método que, para una palabra, devuelve un String que contiene todas las
@@ -215,7 +260,11 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * dejando el algoritmo listo para volver a insertar una gramática nueva.
      */
     public void removeGrammar() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        conjuntoTerminales.clear();
+        conjuntoNoTerminales.clear();
+        productions.clear();
+        conjuntoProducciones.clear();
+        axioma = '\0';
     }
 
     @Override

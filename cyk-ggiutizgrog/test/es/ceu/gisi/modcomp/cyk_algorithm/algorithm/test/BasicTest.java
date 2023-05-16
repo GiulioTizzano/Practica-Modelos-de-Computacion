@@ -79,7 +79,7 @@ public class BasicTest {
         cyk = new CYKAlgorithm();
         cyk.addNonTerminal('0');
     }
-
+// Este Test me falla
     @Test
     public void comprobarAniadirNoTerminalNoValido3() throws CYKAlgorithmException {
         thrown.expect(CYKAlgorithmException.class);
@@ -224,7 +224,7 @@ public class BasicTest {
         cyk.addProduction('A', "SA");
         cyk.addProduction('A', "SA");
     }
-
+// Este Test me falla
     @Test
     public void comprobarRecuperarProducciones() throws CYKAlgorithmException {
         cyk = new CYKAlgorithm();
@@ -256,7 +256,7 @@ public class BasicTest {
         assertEquals("C::=AB|a", cyk.getProductions('C'));
 
     }
-
+// Este Test me falla
     @Test
     public void comprobarEliminarGramaticaValido() throws CYKAlgorithmException {
         cyk = new CYKAlgorithm();
@@ -359,7 +359,7 @@ public class BasicTest {
 
         cyk.isDerived("caabb");
     }
-
+// Este Test me falla
     @Test
     public void comprobarDerivacionValido1() throws CYKAlgorithmException {
 
@@ -389,7 +389,7 @@ public class BasicTest {
 
         assertTrue(cyk.isDerived("baaba"));
     }
-
+// Este Test me falla
     @Test
     public void comprobarDerivacionValido2() throws CYKAlgorithmException {
 
