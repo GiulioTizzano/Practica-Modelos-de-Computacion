@@ -208,10 +208,10 @@ public class BasicTest {
 
         cyk.addNonTerminal('S');
         cyk.addNonTerminal('A');
-
+        
         cyk.addProduction('A', "SAA");
     }
-
+// Este Test me falla
     @Test
     public void comprobarAniadirProduccionNoValida8() throws CYKAlgorithmException {
         thrown.expect(CYKAlgorithmException.class);

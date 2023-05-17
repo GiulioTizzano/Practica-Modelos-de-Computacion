@@ -57,7 +57,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     // En este método haremos algo parecido al método de arriba, pero añadiremos
     // los elementos terminales en su conjunto correspondiente.
     public void addTerminal(char terminal) throws CYKAlgorithmException {
-        if(Character.isLowerCase(terminal) && conjuntoTerminales.contains(terminal)){
+        if(Character.isLowerCase(terminal) && !conjuntoTerminales.contains(terminal)){
             conjuntoTerminales.add(terminal);
         } else{
             throw new CYKAlgorithmException();
@@ -106,10 +106,10 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     @Override
     // He movido el override aquí abajo
     public void addProduction(char nonterminal, String production) throws CYKAlgorithmException {
+        
     if(production.length() != 2 && production.length() != 1){
         throw new CYKAlgorithmException();
     }
-
     if(production.length() == 2){
         char[] elementosNoTerminales = production.toCharArray();
         for(char elementoNoTerminal: elementosNoTerminales){
@@ -121,6 +121,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
                     conjuntoProducciones.add(elementoNoTerminal2String);
                     productions.put(nonterminal, conjuntoProducciones);
                 }
+                
             }
         }
         productions.put(nonterminal, conjuntoProducciones);
@@ -280,7 +281,20 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * salida podría ser: "S::=AB|BC".
      */
     public String getProductions(char nonterminal) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Usar StringBuilder para luego poder devolverlo como String para indicar el elemento no terminal junto con "::=" separadp por |.
+        StringBuilder stb2Producciones = new StringBuilder();
+        HashSet<String> produccionesNoTerminales = productions.get(nonterminal);
+        
+        if(produccionesNoTerminales != null){
+            stb2Producciones.append(nonterminal).append("::=");
+            for(String produccion: produccionesNoTerminales){
+                stb2Producciones.append(produccion).append("|");
+            }
+            if(stb2Producciones.length() > 0){
+                stb2Producciones.deleteCharAt(stb2Producciones.length() - 1);
+            }
+        }
+        return stb2Producciones.toString();
     }
 
     @Override
