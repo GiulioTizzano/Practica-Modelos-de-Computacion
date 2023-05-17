@@ -59,7 +59,7 @@ public class BasicTest {
         cyk.addTerminal('a');
         cyk.addTerminal('a');
     }
-
+// Arreglado
     @Test
     public void comprobarAniadirNoTerminalValido() throws CYKAlgorithmException {
         cyk = new CYKAlgorithm();
@@ -79,7 +79,7 @@ public class BasicTest {
         cyk = new CYKAlgorithm();
         cyk.addNonTerminal('0');
     }
-// Este Test me falla
+// Este Test: arreglado
     @Test
     public void comprobarAniadirNoTerminalNoValido3() throws CYKAlgorithmException {
         thrown.expect(CYKAlgorithmException.class);
@@ -141,7 +141,7 @@ public class BasicTest {
 
         cyk.addProduction('S', "b");
     }
-
+// Arreglado
     @Test
     public void comprobarAniadirProduccionNoValida2() throws CYKAlgorithmException {
         thrown.expect(CYKAlgorithmException.class);
@@ -211,7 +211,7 @@ public class BasicTest {
         
         cyk.addProduction('A', "SAA");
     }
-// Este Test me falla
+// Arreglado
     @Test
     public void comprobarAniadirProduccionNoValida8() throws CYKAlgorithmException {
         thrown.expect(CYKAlgorithmException.class);
@@ -256,7 +256,7 @@ public class BasicTest {
         assertEquals("C::=AB|a", cyk.getProductions('C'));
 
     }
-// Este Test me falla
+// Arreglado
     @Test
     public void comprobarEliminarGramaticaValido() throws CYKAlgorithmException {
         cyk = new CYKAlgorithm();

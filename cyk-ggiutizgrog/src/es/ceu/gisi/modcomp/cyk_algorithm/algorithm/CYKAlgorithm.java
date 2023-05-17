@@ -39,8 +39,27 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
 
 
     public void addNonTerminal(char nonterminal) throws CYKAlgorithmException {
-        if(Character.isUpperCase(nonterminal)){
+        // Ver si funciona el último esto que he hecho
+        
+//        if(conjuntoNoTerminales.contains(nonterminal)){
+//            throw new CYKAlgorithmException();
+//        }
+//        if(!conjuntoNoTerminales.contains(nonterminal)){
+//            conjuntoNoTerminales.add();
+//        } else{
+//            conjuntoNoTerminales.add(nonterminal);
+//        }
+        
+//        if(conjuntoNoTerminales.contains(nonterminal)){
+//            throw new CYKAlgorithmException();
+//        } else if(!conjuntoNoTerminales.contains(nonterminal)){
+//            throw new CYKAlgorithmException();
+//        } else{
+//            conjuntoNoTerminales.add(nonterminal);
+//        }
+        if(Character.isUpperCase(nonterminal) && !conjuntoNoTerminales.contains(nonterminal)){
             conjuntoNoTerminales.add(nonterminal);
+            productions.put(nonterminal, new HashSet<>());
         } else{
             throw new CYKAlgorithmException();
         }
@@ -102,40 +121,39 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     // y así definir las derivaciones de la gramática.
     HashMap<Character, HashSet<String>> productions = new HashMap<>();
     // También tiene sentido generar un conjunto de producciones donde se guardarán las reglas de la gramática en forma de cadenas o Strings.
-    HashSet<String> conjuntoProducciones = new HashSet<>();
+    // HashSet<String> conjuntoProducciones = new HashSet<>();
     @Override
     // He movido el override aquí abajo
     public void addProduction(char nonterminal, String production) throws CYKAlgorithmException {
-        
-    if(production.length() != 2 && production.length() != 1){
+    // HashSet<String> conjuntoProducciones = new HashSet<>();
+    
+    if(!conjuntoNoTerminales.contains(nonterminal)){
         throw new CYKAlgorithmException();
     }
-    if(production.length() == 2){
-        char[] elementosNoTerminales = production.toCharArray();
-        for(char elementoNoTerminal: elementosNoTerminales){
-            if(!conjuntoNoTerminales.contains(elementoNoTerminal)){
-                throw new CYKAlgorithmException();
-            } else{
-                for(char elementoNoTerminal2: elementosNoTerminales) {
-                    String elementoNoTerminal2String = String.valueOf(elementoNoTerminal2);
-                    conjuntoProducciones.add(elementoNoTerminal2String);
-                    productions.put(nonterminal, conjuntoProducciones);
-                }
-                
-            }
-        }
-        productions.put(nonterminal, conjuntoProducciones);
-    } else if(production.length() == 1){
-        char elementoTerminal = production.charAt(0);
-        if(!conjuntoTerminales.contains(elementoTerminal)) {
-            throw new CYKAlgorithmException();
-        } else{
-            String elementoTerminalString = String.valueOf(elementoTerminal);
-            conjuntoProducciones.add(elementoTerminalString);
-            productions.put(nonterminal, conjuntoProducciones);
-        }
-    }
     
+    for(char caracter: production.toCharArray()){
+        if(Character.isLowerCase(caracter) && !conjuntoTerminales.contains(caracter)){
+            throw new CYKAlgorithmException();
+        } else if(Character.isUpperCase(caracter) && !conjuntoNoTerminales.contains(caracter)){
+            throw new CYKAlgorithmException();
+        }
+    
+    }
+//     char charPosition1 = production.charAt(0);
+//     char charPosition2 = production.charAt(1);
+
+    if(production.length() == 2 && Character.isUpperCase(production.charAt(0)) && Character.isUpperCase(production.charAt(1))){
+        HashSet<String> produccionNoTerminal = productions.get(nonterminal);
+        if(!produccionNoTerminal.contains(production)){
+            produccionNoTerminal.add(production);
+        } else{
+            throw new CYKAlgorithmException();
+        } 
+    } else if(production.length() == 1 && Character.isLowerCase(production.charAt(0))){
+        productions.get(nonterminal).add(production);
+    } else{
+        throw new CYKAlgorithmException();
+    }
 }
     
     @Override
@@ -251,6 +269,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * gramática es vacía o si el autómata carece de axioma.
      */
     public String algorithmStateToString(String word) throws CYKAlgorithmException {
+        // TODO
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -264,7 +283,6 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         conjuntoTerminales.clear();
         conjuntoNoTerminales.clear();
         productions.clear();
-        conjuntoProducciones.clear();
         axioma = '\0';
     }
 
@@ -285,15 +303,18 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         StringBuilder stb2Producciones = new StringBuilder();
         HashSet<String> produccionesNoTerminales = productions.get(nonterminal);
         
-        if(produccionesNoTerminales != null){
+       if(produccionesNoTerminales != null){
+            // Insertamos ::= .
             stb2Producciones.append(nonterminal).append("::=");
             for(String produccion: produccionesNoTerminales){
+                // Para separar cada produccion generado por los terminales añadimos |.
                 stb2Producciones.append(produccion).append("|");
             }
+            // Si una produccion ha terminado, tenemos que asegurarnos de que la barra | no sea el último caracter de la cadena.
             if(stb2Producciones.length() > 0){
                 stb2Producciones.deleteCharAt(stb2Producciones.length() - 1);
             }
-        }
+         }
         return stb2Producciones.toString();
     }
 
@@ -305,6 +326,12 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      * elementos no terminales.
      */
     public String getGrammar() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        StringBuilder stb3GetGrammar = new StringBuilder();
+        //  Lo que tenemos que hacer es iterar por cada elemento no terminal en la gramática:
+        // Usamos el método keySet() sobre el Map "productions" para obtener un conjunto de las llaves de Map, es decir, el conjunto de no terminales --> los caracteres del Map (HashMap).
+        for(char noTerminal: productions.keySet()){
+            stb3GetGrammar.append(noTerminal).append("\n");
+        }
+        return stb3GetGrammar.toString();
     }
 }
