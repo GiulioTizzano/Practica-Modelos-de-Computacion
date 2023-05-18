@@ -174,14 +174,9 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         // Aquí tenemos que aplicar el algoritmo CYK. Primero creamos una matriz del tamaño de la palabra insertada como parámetro 
         // Para poder empezar a aplicar el algoritmo dada una reglas para la gramática.
         
-        int matrixLength = word.length();
-        boolean[][] matrix = new boolean[matrixLength][matrixLength];
-        /*for(int i = matrixLength; i >= 0; i--){
-            for(int j = 1; i <= matrixLength; i++){
-            matrix[i][j] = ""; // TODO
-            }
-        }*/
-        
+        int longitudPalabra = word.length();
+        HashSet<Character>[][] matrix = new HashSet[longitudPalabra][longitudPalabra];
+       
         // Primero hay que verificar si la palabra 'word' insertada como parámetro no está vacía
         if(word.isEmpty()){
             throw new CYKAlgorithmException();
@@ -195,62 +190,75 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
         if(axioma == '\0' || Character.isWhitespace(axioma)){
         throw new CYKAlgorithmException();
         }
-        
+        //System.out.println(conjuntoTerminales.toString());
         // Hay que verificar si la palabra 'word' contiene elementos no terminales, y en caso de que las tenga, lanzar una excepción:
-        for(int i = 1; i <= word.length(); i++){
-            if(!conjuntoNoTerminales.contains(word.charAt(i))){
+        for(int i = 0; i < longitudPalabra; i++){
+            if(!conjuntoTerminales.contains(word.charAt(i))){
                 throw new CYKAlgorithmException();
             }
         }
-        /*// Luego hay que rellenar la matriz de tamaño matrixLength x matrixLength con espacion vacíos, así al aplicar el algoritmo CYK, podremos añadir cada símbolo terminal en su celda correspondiente.
-        for(int i = 1; i <= matrixLength; i++){
-            for(int j = 1; j<= matrixLength; j++){
-                matrix[i][j] = "";
-            }
-        }*/
-        // Ahora toca aplicar el algoritmo CYK:
+        // Aquí copiamos todas las producciones contenidas dentro del HashMap 'productions' para guardar cada regla de la producción para cada elemento no terminal correspondiente
+        HashMap<Character, HashSet<String>> produccionesParaNoTerminales = new HashMap<>();
+        for(char noTerminal: conjuntoNoTerminales){
+            produccionesParaNoTerminales.put(noTerminal, new HashSet<>());
+        }
+        // Guardamos cada regla con su elemento no terminal
+        for(HashMap.Entry<Character, HashSet<String>> entry: productions.entrySet()){
+            char noTerminal = entry.getKey();
+            HashSet<String> produciones = entry.getValue();
+            produccionesParaNoTerminales.get(noTerminal).addAll(produciones);
+        }
         
-        // Llenar la matriz con subcadenas cogidas de 1 en 1 para toda la palabra 'word'
-        for(int i = 0; i < matrixLength; i++){
-            char simboloTerminal = word.charAt(i);
-            
-            // Ahora tenemos que comprobar si alguna de las producciones genera un elemento terminal
+        for(int i = 0; i < longitudPalabra; i++){
+            for(int j= 0; j < longitudPalabra; j++){
+                matrix[i][j] = new HashSet<>();
+            }  
+        }
+        // Itera por cada simbolo en la palabra pasada como parámetro al método y para cada no terminal verifica si hay una regla que produce el simbolo actual por el que se está parseando. En caso de que así sea, lo añade a la 
+        // matriz que inicialmente estaba vacía.
+       for(int i = 0; i < longitudPalabra; i++){
+           char simboloTerminal = word.charAt(i);
             for(char noTerminal: conjuntoNoTerminales){
-                HashSet<String> productionNoTerminal = productions.get(noTerminal);
-                for(String producion: productionNoTerminal){
-                    if(producion.length() == 1 && producion.charAt(0) == simboloTerminal){
-                        matrix[i][i] = true;
-                    }
+            HashSet<String> producciones = produccionesParaNoTerminales.get(noTerminal);
+            
+            for(String produccion: producciones){
+                if(produccion.length() == 1 && produccion.charAt(0) == simboloTerminal){
+                matrix[i][i].add(noTerminal);
                 }
             }
         }
-        // Ahora tenemos que coger las subcadenas de n en m con n <= m. Es decir, calcular las subcadenas con una longitud > 1.
-        for(int longitud = 2; longitud <= matrixLength; longitud++){
-            for(int i = 0; i <= matrixLength - longitud; i++){
-                int j = i + longitud - 1;
-                // Comprobar todas las combinaciones de no terminales para ver si generar la subcadena.
-                for(int k = i; k < j; k++){
-                    for(char noTerminal: conjuntoNoTerminales){
-                        HashSet<String> production2NoTerminal = productions.get(noTerminal);
-                        // Comprobar combinación de símbolos
-                        for(String producion2: production2NoTerminal){
-                            if(producion2.length() == 2){
-                                // TODO
-                                if(matrix[i][k] && matrix[k + 1][j] && conjuntoNoTerminales.contains(producion2.charAt(0)) && conjuntoNoTerminales.contains(producion2.charAt(1))){
-                                    // TODO
-                                    matrix[i][j] = true;
-                                    break;
-                                    // El break sirve para salir del if más 'anidado'
-                                }
+    }
+       // Aplicación del algirtmo CYK: aquí itera sobre las subcadenas de n en m tal que n <= m, con n = 2 en la primera iteración y llena la matrix/tabla en base a los no terminales que pueden generar esa porción de subcadena
+       // para la que sea está iterando en un momento dado.
+       for (int longi = 2; longi <= longitudPalabra; longi++) {
+        for (int i = 0; i <= longitudPalabra - longi; i++) {
+            int j = i + longi - 1;
+
+            for (int k = i; k < j; k++) {
+                Set<Character> set1 = matrix[i][k];
+                Set<Character> set2 = matrix[k + 1][j];
+
+                for(char noTerminal : conjuntoNoTerminales){
+                    Set<String> producciones = produccionesParaNoTerminales.get(noTerminal);
+
+                    for(String produccion : producciones){
+                        if (produccion.length() == 2){
+                            char simbolo1 = produccion.charAt(0);
+                            char simbolo2 = produccion.charAt(1);
+
+                            if(set1.contains(simbolo1) && set2.contains(simbolo2)){
+                                matrix[i][j].add(noTerminal);
                             }
                         }
                     }
                 }
             }
         }
-        return matrix[0][matrixLength - 1];
-        // Para retornar el axioma en caso de que se encuentre dentro de la cela inicial de la matriz
     }
+       // Aquí chequamos que el axioma esté en la celda arriba a la derecha de la matriz 'matrix', si está ahí devuelve true, sino false.
+    return matrix[0][longitudPalabra - 1].contains(axioma);
+        
+}
     
     @Override
     /**
@@ -270,8 +278,96 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
      */
     public String algorithmStateToString(String word) throws CYKAlgorithmException {
         // TODO
-        throw new UnsupportedOperationException("Not supported yet.");
+        int longitudPalabra = word.length();
+        HashSet<Character>[][] matrix = new HashSet[longitudPalabra][longitudPalabra];
+       
+        // Primero hay que verificar si la palabra 'word' insertada como parámetro no está vacía
+        if(word.isEmpty()){
+            throw new CYKAlgorithmException();
+        }
+        
+        // Luego tenemos que verificar si la gramática está vacía-
+         if(conjuntoNoTerminales.isEmpty()){
+             throw new CYKAlgorithmException();
+         }
+        // Si el propio autómata no contiene el axioma para la producción.
+        if(axioma == '\0' || Character.isWhitespace(axioma)){
+        throw new CYKAlgorithmException();
+        }
+        //System.out.println(conjuntoTerminales.toString());
+        // Hay que verificar si la palabra 'word' contiene elementos no terminales, y en caso de que las tenga, lanzar una excepción:
+        // Si comento esto funciona
+        for(int i = 0; i < longitudPalabra; i++){
+            if(!conjuntoTerminales.contains(word.charAt(i))){
+                throw new CYKAlgorithmException();
+            }
+        }
+        HashMap<Character, HashSet<String>> produccionesParaNoTerminales = new HashMap<>();
+        for(char noTerminal: conjuntoNoTerminales){
+            produccionesParaNoTerminales.put(noTerminal, new HashSet<>());
+        }
+        
+        for(HashMap.Entry<Character, HashSet<String>> entry: productions.entrySet()){
+            char noTerminal = entry.getKey();
+            HashSet<String> produciones = entry.getValue();
+            produccionesParaNoTerminales.get(noTerminal).addAll(produciones);
+        }
+        
+        for(int i = 0; i < longitudPalabra; i++){
+            for(int j= 0; j < longitudPalabra; j++){
+                matrix[i][j] = new HashSet<>();
+            }  
+        }
+        
+       for(int i = 0; i < longitudPalabra; i++){
+           char simboloTerminal = word.charAt(i);
+            for(char noTerminal: conjuntoNoTerminales){
+            HashSet<String> producciones = produccionesParaNoTerminales.get(noTerminal);
+            
+            for(String produccion: producciones){
+                if(produccion.length() == 1 && produccion.charAt(0) == simboloTerminal){
+                matrix[i][i].add(noTerminal);
+                }
+            }
+        }
     }
+       for (int longi = 2; longi <= longitudPalabra; longi++) {
+        for (int i = 0; i <= longitudPalabra - longi; i++) {
+            int j = i + longi - 1;
+
+            for(int k = i; k < j; k++){
+                Set<Character> set1 = matrix[i][k];
+                Set<Character> set2 = matrix[k + 1][j];
+
+                for(char noTerminal : conjuntoNoTerminales){
+                    Set<String> producciones = produccionesParaNoTerminales.get(noTerminal);
+
+                    for(String produccion : producciones){
+                        if(produccion.length() == 2) {
+                            char simbolo1 = produccion.charAt(0);
+                            char simbolo2 = produccion.charAt(1);
+
+                            if(set1.contains(simbolo1) && set2.contains(simbolo2)){
+                                matrix[i][j].add(noTerminal);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+       StringBuilder stb4 = new StringBuilder();
+       for(int i = 0; i < longitudPalabra; i++){
+           for(int j = 0; j < longitudPalabra; j++){
+               
+               stb4.append(matrix[i][j]);
+               
+           }
+           stb4.append("\n");
+       }
+       return stb4.toString();
+    }
+    
 
     @Override
     /**
