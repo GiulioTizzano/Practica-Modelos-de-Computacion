@@ -259,7 +259,7 @@ public class CYKAlgorithm implements CYKAlgorithmInterface {
     return matrix[0][longitudPalabra - 1].contains(axioma);
         
 }
-    
+    // 
     @Override
     /**
      * Método que, para una palabra, devuelve un String que contiene todas las
